@@ -90,12 +90,18 @@ namespace TestApp
             excelHelper.WriteToCell(1, 1, "Дата выполнения: " + DateTime.Now.ToString());
             excelHelper.WriteToCell(2, 1, "Количество контролирующих органов:");
             excelHelper.WriteToCell(3, 1, "Общее - " + result_list.Count);
+            string splitter = ", ", row_4 = "";
             for (int i = 0; i < types.Count; i++)
             {
-                excelHelper.WriteToCell(4, i + 1, 
-                    types.Keys.ElementAt(i).ToString() + " - " + types.Values.ElementAt(i));
+                if (types.Count - i == 1) splitter = "";
+                row_4 += types.Keys.ElementAt(i).ToString() + 
+                    " - " + types.Values.ElementAt(i) + splitter;
             }
-            
+            excelHelper.WriteToCell(4, 1, row_4);
+            excelHelper.WriteToCell(5, 1, "Тип");
+            excelHelper.WriteToCell(5, 2, "Код");
+            excelHelper.WriteToCell(5, 3, "Имя");
+            excelHelper.WriteToCell(5, 4, "ИНН");
             //Сохраняю файл в папке с *.exe файлом проекта
             excelHelper.SaveFile("Result.xlsx");
         }
