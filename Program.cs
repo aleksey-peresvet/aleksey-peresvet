@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;//Стороннее решение для работы с JSON
-using System.Linq;
 
 namespace TestApp
 {
@@ -22,82 +21,44 @@ namespace TestApp
             }
             //Конвертация JSON в объект С#
             var rootjson = JsonConvert.DeserializeObject<JsonObject.Rootobject>(responseBody);
-            List<List<string>> result_list = new();
-            foreach (var json_block in rootjson.cus)
+            MySelection selection = new MySelection();
+            var temp_list = from json in rootjson.cus
+                            where json.region == "18"
+                            select json;
+            foreach (var data in temp_list)
             {
-                //Делаю выборку по региону
-                if (json_block.region == "18")
-                {
-                    if (json_block.type == null) json_block.type = "";
-                    if (json_block.code == null) json_block.code = "";
-                    if (json_block.name == null) json_block.name = "";
-                    if (json_block.soun.inn == null) json_block.soun.inn = "";
-                    //Пишу выборку в двумерный список
-                    List<string> temp_list = new() {
-                        json_block.type.ToString(),
-                        json_block.code.ToString(),
-                        json_block.name.ToString(),
-                        json_block.soun.inn.ToString() };
-                    result_list.Add(temp_list);
-                }
+                if (data.type == null) data.type = "";
+                if (data.code == null) data.code = "";
+                if (data.name == null) data.name = "";
+                if (data.soun.inn == null) data.soun.inn = "";
+                selection.AddNewRow(
+                        data.type.ToString(),
+                        data.code.ToString(),
+                        data.name.ToString(),
+                        data.soun.inn.ToString());
             }
             //Начинается работа с экспортом выборки в файл эксцель
             //Снова использую сторонее решение
-            int row = 5, column = 0, count = 0;
+            int row_indent = 6;
             ExcelHelper excelHelper = new ExcelHelper();
-            //Создаю словарь для записи количества типов органов
-            Dictionary<string, int> types = new Dictionary<string, int>();
-
-            foreach (var sub_list in result_list)
+            for(int row=0; row<selection.RowCount(); row++)
             {
-                row++;
-                foreach (var data in sub_list)
+                for (int column = 0; column < 4; column++)
                 {
-                    column++;
-                    if (column == 1)
-                    {
-                        if (types == null)
-                        {
-                            types.Add(data, 1);
-                        } 
-                        else
-                        {
-                            if (types.Keys.Contains(data))
-                            {
-                                count = types.GetValueOrDefault(data);
-                                count++;
-                                types.Remove(data);
-                                types.Add(data, count);
-                            }
-                            else
-                            {
-                                types.Add(data, 1);
-                            }
-                        }
-                        
-                    }
                     //Пишу данные выборки в таблицу эксцель
-                    excelHelper.WriteToCell(row, column, data);
+                    excelHelper.WriteToCell(row + row_indent, column+1, 
+                        selection.GetRow(row)[column]);
                 }
-                column = 0;
             }
-            //Сортирую словарь типов, чтобы привести его к последовательности
-            //получившейся выборки
-            types = 
-                types.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
             //Шапка выборки
             excelHelper.SortByColumns("A,B");
             excelHelper.WriteToCell(1, 1, "Дата выполнения: " + DateTime.Now.ToString());
             excelHelper.WriteToCell(2, 1, "Количество контролирующих органов:");
-            excelHelper.WriteToCell(3, 1, "Общее - " + result_list.Count);
-            string splitter = ", ", row_4 = "";
-            for (int i = 0; i < types.Count; i++)
+            excelHelper.WriteToCell(3, 1, "Общее - " + selection.RowCount());
+            for (int column = 0; column < selection.GetTypesCount(); column++)
             {
-                if (types.Count - i == 1) splitter = "";
-                row_4 += types.Keys.ElementAt(i).ToString() + 
-                    " - " + types.Values.ElementAt(i) + splitter;
+                excelHelper.WriteToCell(4, column + 1, selection.GetTypes()[column]);
             }
-            excelHelper.WriteToCell(4, 1, row_4);
             excelHelper.WriteToCell(5, 1, "Тип");
             excelHelper.WriteToCell(5, 2, "Код");
             excelHelper.WriteToCell(5, 3, "Имя");
