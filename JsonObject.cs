@@ -29,7 +29,6 @@
                 name = string.Empty;
                 type = string.Empty;
                 region = string.Empty;
-                type = string.Empty;
             }
         }
 
