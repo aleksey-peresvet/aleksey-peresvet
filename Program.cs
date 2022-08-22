@@ -22,9 +22,14 @@ namespace TestApp
             //Конвертация JSON в объект С#
             var rootjson = JsonConvert.DeserializeObject<JsonObject.Rootobject>(responseBody);
             MySelection selection = new MySelection();
-            var temp_list = from json in rootjson.cus
-                            where json.region == "18"
-                            select json;
+            IEnumerable<JsonObject.Cu> temp_list = Enumerable.Empty<JsonObject.Cu>();
+            if (rootjson != null)
+            {
+                temp_list =
+                from json in rootjson.cus
+                where json.region == "18"
+                select json;
+            }
             foreach (var data in temp_list)
             {
                 if (data.type == null) data.type = "";

@@ -3,10 +3,14 @@
     internal class MySelection
     {
         private List<string[]> rows;
+
+        public MySelection()
+        {
+            rows = new List<string[]>();
+        }
         public void AddNewRow(string _type, string _code,
             string _name, string _inn)
         {
-            if (rows == null) rows = new List<string[]>();
             rows.Add(new[] { _type, _code, _name, _inn });
         }
 
