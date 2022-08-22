@@ -32,10 +32,6 @@ namespace TestApp
             }
             foreach (var data in temp_list)
             {
-                if (data.type == null) data.type = "";
-                if (data.code == null) data.code = "";
-                if (data.name == null) data.name = "";
-                if (data.soun.inn == null) data.soun.inn = "";
                 selection.AddNewRow(
                         data.type.ToString(),
                         data.code.ToString(),
